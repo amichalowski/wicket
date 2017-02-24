@@ -45,4 +45,19 @@ public interface IRequestHandler
 	 */
 	default void detach(IRequestCycle requestCycle)
 	{}
+
+	/**
+	 * Unwraps the handler if it is a {@code IRequestHandlerDelegate} down to the deepest nested
+	 * handler.
+	 *
+	 * @return the deepest handler that does not implement {@code IRequestHandlerDelegate}
+	 */
+	default IRequestHandler unwrap()
+	{
+		IRequestHandler handler = this;
+		while (handler instanceof IRequestHandlerDelegate) {
+            handler = ((IRequestHandlerDelegate) handler).getDelegateHandler();
+        }
+		return handler;
+	}
 }

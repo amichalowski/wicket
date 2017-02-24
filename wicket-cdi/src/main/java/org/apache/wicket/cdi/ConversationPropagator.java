@@ -437,11 +437,7 @@ public class ConversationPropagator implements IRequestCycleListener
 	 */
 	public static Page getPage(IRequestHandler handler)
 	{
-		while (handler instanceof IRequestHandlerDelegate)
-		{
-			handler = ((IRequestHandlerDelegate)handler).getDelegateHandler();
-		}
-
+		handler = handler.unwrap();
 		if (handler instanceof IPageRequestHandler)
 		{
 			IPageRequestHandler pageHandler = (IPageRequestHandler)handler;

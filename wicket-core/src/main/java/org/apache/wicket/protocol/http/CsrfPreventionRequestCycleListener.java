@@ -313,21 +313,6 @@ public class CsrfPreventionRequestCycleListener implements IRequestCycleListener
 			!(handler instanceof RenderPageRequestHandler);
 	}
 
-	/**
-	 * Unwraps the handler if it is a {@code IRequestHandlerDelegate} down to the deepest nested
-	 * handler.
-	 *
-	 * @param handler
-	 *            The handler to unwrap
-	 * @return the deepest handler that does not implement {@code IRequestHandlerDelegate}
-	 */
-	protected IRequestHandler unwrap(IRequestHandler handler)
-	{
-		while (handler instanceof IRequestHandlerDelegate)
-			handler = ((IRequestHandlerDelegate)handler).getDelegateHandler();
-		return handler;
-	}
-
 	@Override
 	public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler)
 	{
@@ -337,7 +322,7 @@ public class CsrfPreventionRequestCycleListener implements IRequestCycleListener
 			return;
 		}
 
-		handler = unwrap(handler);
+		handler = handler.unwrap();
 
 		// check if the request is targeted at a page
 		if (isChecked(handler))

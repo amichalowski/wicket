@@ -34,7 +34,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.protocol.http.PageExpiredException;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.IRequestHandlerDelegate;
 import org.apache.wicket.request.Request;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.Url.StringMode;
@@ -83,7 +82,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		WebApplication application = tester.getApplication();
 		application.mountPage(MOUNTED_URL, Page1.class);
 
-		/**
+		/*
 		 * Use explicit crypt provider to prevent crypt warning output, see
 		 * SecuritySettings#getCryptFactory()
 		 */
@@ -119,7 +118,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 	{
 		IRequestHandler requestHandler = mapper.mapRequest(getRequest(Url.parse("")));
 		assertNotNull("Unable to map request for home page", requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 		RenderPageRequestHandler handler = (RenderPageRequestHandler) requestHandler;
 		assertSame(tester.getApplication().getHomePage(), handler.getPageClass());
@@ -148,7 +147,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 		assertNotNull(requestHandler);
 
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 		RenderPageRequestHandler handler = (RenderPageRequestHandler) requestHandler;
 		assertEquals(tester.getApplication().getHomePage(), handler.getPageClass());
@@ -196,7 +195,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 
@@ -218,7 +217,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertTrue(requestHandler instanceof RenderPageRequestHandler);
 
@@ -239,7 +238,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 			.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 
@@ -295,7 +294,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(getRequest(Url.parse(ENCRYPTED_PAGE_INSTANCE_URL)));
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 		RenderPageRequestHandler handler = (RenderPageRequestHandler) requestHandler;
@@ -312,7 +311,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 			.mapRequest(getRequest(Url.parse(ENCRYPTED_PAGE_INSTANCE_URL)));
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 		RenderPageRequestHandler handler = (RenderPageRequestHandler) requestHandler;
@@ -342,7 +341,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 
 		assertNotNull(requestHandler);
 
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 
@@ -389,7 +388,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 
 		assertNotNull(requestHandler);
 
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(ListenerRequestHandler.class));
 
@@ -405,7 +404,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 
 		assertNotNull(requestHandler);
 
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertThat(requestHandler, instanceOf(ListenerRequestHandler.class));
 
@@ -473,7 +472,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		Request request = getRequest(url);
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(RenderPageRequestHandler.class));
 
 		RenderPageRequestHandler handler = (RenderPageRequestHandler) requestHandler;
@@ -510,7 +509,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(ResourceReferenceRequestHandler.class));
 		ResourceReferenceRequestHandler handler = (ResourceReferenceRequestHandler) requestHandler;
 
@@ -535,7 +534,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(ResourceReferenceRequestHandler.class));
 		ResourceReferenceRequestHandler handler = (ResourceReferenceRequestHandler) requestHandler;
 
@@ -561,7 +560,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		ResourceReferenceRequestHandler handler = (ResourceReferenceRequestHandler) requestHandler;
 
 		assertEquals(getClass(), handler.getResourceReference().getScope());
@@ -586,7 +585,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 		assertThat(requestHandler, instanceOf(ResourceReferenceRequestHandler.class));
 		ResourceReferenceRequestHandler handler = (ResourceReferenceRequestHandler) requestHandler;
 
@@ -628,7 +627,7 @@ public class CryptoMapperTest extends AbstractMapperTest
 		IRequestHandler requestHandler = mapper.mapRequest(request);
 
 		assertNotNull(requestHandler);
-		requestHandler = unwrapRequestHandlerDelegate(requestHandler);
+		requestHandler = requestHandler.unwrap();
 
 		assertTrue(requestHandler instanceof RenderPageRequestHandler);
 
@@ -647,15 +646,6 @@ public class CryptoMapperTest extends AbstractMapperTest
 		mapper.mapRequest(getRequest(encryptedUrl));
 	}
 
-	private static IRequestHandler unwrapRequestHandlerDelegate(IRequestHandler handler)
-	{
-		while (handler instanceof IRequestHandlerDelegate)
-		{
-			handler = ((IRequestHandlerDelegate) handler).getDelegateHandler();
-		}
-
-		return handler;
-	}
 
 	/**
 	 * Home page

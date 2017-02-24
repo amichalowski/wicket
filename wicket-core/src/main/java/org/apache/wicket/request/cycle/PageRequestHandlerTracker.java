@@ -67,10 +67,10 @@ public class PageRequestHandlerTracker implements IRequestCycleListener
 	 */
 	private void registerLastHandler(RequestCycle cycle, IRequestHandler handler)
 	{
-		final IPageRequestHandler pageRequestHandler = findPageRequestHandler(handler);
-		if (pageRequestHandler != null)
+		handler = handler.unwrap();
+		if (handler instanceof  IPageRequestHandler)
 		{
-			cycle.setMetaData(LAST_HANDLER_KEY, pageRequestHandler);
+			cycle.setMetaData(LAST_HANDLER_KEY, (IPageRequestHandler)handler);
 		}
 	}
 
@@ -86,31 +86,12 @@ public class PageRequestHandlerTracker implements IRequestCycleListener
 	{
 		if (getFirstHandler(cycle) == null)
 		{
-			final IPageRequestHandler pageRequestHandler = findPageRequestHandler(handler);
-			if (pageRequestHandler != null)
+			handler = handler.unwrap();
+			if (handler instanceof  IPageRequestHandler)
 			{
-				cycle.setMetaData(FIRST_HANDLER_KEY, pageRequestHandler);
+				cycle.setMetaData(FIRST_HANDLER_KEY, (IPageRequestHandler)handler);
 			}
 		}
-	}
-
-	/**
-	 * Looking for IPageRequestHandler 
-	 * 
-	 * @param handler
-	 * @return IPageRequestHandler if exist otherwise null
-	 */
-	private IPageRequestHandler findPageRequestHandler(IRequestHandler handler)
-	{
-		if (handler instanceof IPageRequestHandler)
-		{
-			return (IPageRequestHandler)handler;
-		}
-	    if (handler instanceof IRequestHandlerDelegate)
-	    {
-	    	return findPageRequestHandler(((IRequestHandlerDelegate)handler).getDelegateHandler());
-	    }
-	    return null;
 	}
 
    /**
