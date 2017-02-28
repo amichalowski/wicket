@@ -409,7 +409,7 @@ public class BaseWicketTester
 
 		// assign protocol://host:port to next request unless the last request was ajax
 		final boolean assignBaseLocation = lastRequest != null &&
-			lastRequest.getHeader("Wicket-Ajax") == null;
+			lastRequest.getHeader(WebRequest.HEADER_AJAX) == null;
 
 		// resume request processing with scheme://host:port from last request
 		if (assignBaseLocation)
@@ -694,7 +694,7 @@ public class BaseWicketTester
 
 		forcedHandler = forcedRequestHandler;
 
-		if (!redirect && getRequest().getHeader("Wicket-Ajax") == null)
+		if (!redirect && getRequest().getHeader(WebRequest.HEADER_AJAX) == null)
 		{
 			lastRenderedPage = null;
 		}
@@ -1244,8 +1244,8 @@ public class BaseWicketTester
 
 		transform(url);
 		request.setUrl(url);
-		request.addHeader("Wicket-Ajax-BaseURL", url.toString());
-		request.addHeader("Wicket-Ajax", "true");
+		request.addHeader(WebRequest.HEADER_AJAX_BASE_URL, url.toString());
+		request.addHeader(WebRequest.HEADER_AJAX, "true");
 
 		processRequest();
 	}
