@@ -16,42 +16,8 @@
  */
 package org.apache.wicket.util.tester;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.nio.charset.Charset;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpSession;
-
-import org.apache.wicket.Application;
-import org.apache.wicket.Component;
-import org.apache.wicket.IPageManagerProvider;
-import org.apache.wicket.IPageRendererProvider;
-import org.apache.wicket.IRequestCycleProvider;
-import org.apache.wicket.IRequestListener;
-import org.apache.wicket.MarkupContainer;
-import org.apache.wicket.Page;
-import org.apache.wicket.RequestListenerInterface;
-import org.apache.wicket.Session;
-import org.apache.wicket.ThreadContext;
-import org.apache.wicket.WicketRuntimeException;
+import junit.framework.AssertionFailedError;
+import org.apache.wicket.*;
 import org.apache.wicket.ajax.AbstractAjaxTimerBehavior;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxEventBehavior;
@@ -61,34 +27,19 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.IAjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AbstractAjaxBehavior;
-import org.apache.wicket.core.request.handler.BookmarkableListenerInterfaceRequestHandler;
-import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
-import org.apache.wicket.core.request.handler.IPageProvider;
-import org.apache.wicket.core.request.handler.ListenerInterfaceRequestHandler;
-import org.apache.wicket.core.request.handler.PageAndComponentProvider;
-import org.apache.wicket.core.request.handler.PageProvider;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
+import org.apache.wicket.core.request.handler.*;
 import org.apache.wicket.feedback.ExactLevelFeedbackMessageFilter;
 import org.apache.wicket.feedback.FeedbackCollector;
 import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.IFeedbackMessageFilter;
-import org.apache.wicket.markup.ContainerInfo;
-import org.apache.wicket.markup.IMarkupFragment;
-import org.apache.wicket.markup.Markup;
-import org.apache.wicket.markup.MarkupParser;
-import org.apache.wicket.markup.MarkupResourceStream;
+import org.apache.wicket.markup.*;
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.IFormSubmitListener;
 import org.apache.wicket.markup.html.form.SubmitLink;
-import org.apache.wicket.markup.html.link.AbstractLink;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.link.ILinkListener;
-import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.markup.html.link.*;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.parser.XmlPullParser;
 import org.apache.wicket.markup.parser.XmlTag;
@@ -101,19 +52,10 @@ import org.apache.wicket.page.IPageManagerContext;
 import org.apache.wicket.protocol.http.IMetaDataBufferingWebResponse;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.protocol.http.WicketFilter;
-import org.apache.wicket.protocol.http.mock.CookieCollection;
-import org.apache.wicket.protocol.http.mock.MockHttpServletRequest;
-import org.apache.wicket.protocol.http.mock.MockHttpServletResponse;
-import org.apache.wicket.protocol.http.mock.MockHttpSession;
-import org.apache.wicket.protocol.http.mock.MockServletContext;
+import org.apache.wicket.protocol.http.mock.*;
 import org.apache.wicket.protocol.http.servlet.ServletWebRequest;
 import org.apache.wicket.protocol.http.servlet.ServletWebResponse;
-import org.apache.wicket.request.IExceptionMapper;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.IRequestMapper;
-import org.apache.wicket.request.Request;
-import org.apache.wicket.request.Response;
-import org.apache.wicket.request.Url;
+import org.apache.wicket.request.*;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.cycle.RequestCycleContext;
 import org.apache.wicket.request.handler.render.PageRenderer;
@@ -139,7 +81,21 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import junit.framework.AssertionFailedError;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * A helper class to ease unit testing of Wicket applications without the need for a servlet
@@ -186,6 +142,8 @@ public class BaseWicketTester
 	private RequestCycle requestCycle;
 
 	private Page lastRenderedPage;
+	/** used for referer header creation */
+	private MockHttpServletRequest lastRenderedPageRequest;
 
 	private boolean exposeExceptions = true;
 
@@ -397,6 +355,14 @@ public class BaseWicketTester
 	public Page getLastRenderedPage()
 	{
 		return lastRenderedPage;
+	}
+
+	/**
+	 * @return request that caused last page render
+	 */
+	public MockHttpServletRequest getLastRenderedPageRequest()
+	{
+		return lastRenderedPageRequest;
 	}
 
 	/**
@@ -1188,7 +1154,7 @@ public class BaseWicketTester
 			Charset.forName(request.getCharacterEncoding()));
 		transform(url);
 		request.setUrl(url);
-		request.addHeader(WebRequest.HEADER_ORIGIN, createOriginHeader());
+		request.addHeader(WebRequest.HEADER_REFERER, createRefererHeader());
 		request.addHeader(WebRequest.HEADER_AJAX_BASE_URL, url.toString());
 		request.addHeader(WebRequest.HEADER_AJAX, "true");
 
@@ -1212,13 +1178,13 @@ public class BaseWicketTester
 	}
 	
 	/**
-	 * Build value to Origin header based on RequestCycle Url
-	 * 
-	 * @return Origin header
+	 * @return referer header value
 	 */
-	protected String createOriginHeader(){
-		Url url = RequestCycle.get().getRequest().getUrl();
-		return url.getProtocol() + "://" +url.getHost() + ":" + url.getPort();
+	protected String createRefererHeader()
+	{
+		return (lastRenderedPageRequest != null) ?
+			lastRenderedPageRequest.getUrl().toString(Url.StringMode.FULL) :
+			null;
 	}
 
 	/**
@@ -2006,6 +1972,7 @@ public class BaseWicketTester
 					PageParameters parameters = (PageParameters)getParametersMethod.invoke(
 						bookmarkablePageLink, (Object[])null);
 
+					addRequestHeader(WebRequest.HEADER_REFERER, createRefererHeader());
 					startPage(bookmarkablePageLink.getPageClass(), parameters);
 				}
 				catch (Exception e)
@@ -2079,6 +2046,7 @@ public class BaseWicketTester
 		transform(url);
 
 		request.setUrl(url);
+		request.setHeader(WebRequest.HEADER_REFERER, createRefererHeader());
 		processRequest();
 	}
 
@@ -2813,10 +2781,12 @@ public class BaseWicketTester
 							componentInPage = null;
 						}
 						lastRenderedPage = lastPage = renderedPage;
+						lastRenderedPageRequest = request;
 					}
 					else
 					{
 						lastRenderedPage = null;
+						lastRenderedPageRequest = null;
 					}
 				}
 			};
